@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+import Constants
 import Vector exposing (Vector)
 import Physical exposing (Physical)
 
@@ -38,6 +39,7 @@ newShip pos =
     , angle = Vector.unit 0
     , angularSpeed = 0
     , mass = 1
+    , size = Constants.shipSize
     , thrusters = {
         left = False,
         right = False,
@@ -47,14 +49,12 @@ newShip pos =
     }
 
 type alias Asteroid =
-    Physical
-    { size: Float -- size relative to baseline?
-    }
+    Physical {}
 
-newAsteroid : Float -> Vector -> Asteroid
-newAsteroid size pos =
+newAsteroid : Float -> Vector -> Vector -> Asteroid
+newAsteroid size pos velocity =
     { position = pos
-    , velocity = Vector.zero
+    , velocity = velocity
     , angle = Vector.unit 0
     , angularSpeed = 0
     , mass = size -- For now just make size and mass scale linearly.
@@ -65,5 +65,3 @@ type alias GameState =
     { player: Ship
     , asteroids: List Asteroid
     }
-
-

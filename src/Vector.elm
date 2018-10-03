@@ -5,6 +5,24 @@ type Vector
     | Cartesian { x: Float, y: Float }
 
 
+dot : Vector -> Vector -> Float
+dot v1 v2 =
+    let
+        (x1, y1) = toXY v1
+        (x2, y2) = toXY v2
+    in
+        x1 * x2 + y1 * y2
+
+
+negate : Vector -> Vector
+negate vec =
+    case vec of
+        Cartesian {x, y} ->
+            Cartesian { x = -x, y = -y }
+        Polar {r, t} ->
+            Polar { r = r, t = t + turns 0.5 }
+
+
 unit : Float -> Vector
 unit t =
     Polar { r = 1, t = t }
@@ -31,6 +49,15 @@ toXY vec =
             (x, y)
 
 
+toRT : Vector -> (Float, Float)
+toRT vec =
+    case vec of
+        Polar {r, t} ->
+            (r, t)
+        Cartesian {x, y} ->
+            toPolar (x, y)
+
+
 zero : Vector
 zero =
     Cartesian {x = 0, y = 0}
@@ -43,6 +70,15 @@ add v1 v2 =
         (x2, y2) = toXY v2
     in
         Cartesian { x = (x1 + x2), y = (y1 + y2) }
+
+
+subtract : Vector -> Vector -> Vector
+subtract v1 v2 = 
+    let
+        (x1, y1) = toXY v1
+        (x2, y2) = toXY v2
+    in
+        Cartesian { x = (x1 - x2), y = (y1 - y2) }
 
 
 scale : Float -> Vector -> Vector

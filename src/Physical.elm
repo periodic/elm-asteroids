@@ -1,5 +1,6 @@
 module Physical exposing (..)
 
+import Constants
 import Vector exposing (Vector)
 
 type alias HasPosition a =
@@ -25,7 +26,7 @@ type alias HasSize a =
     }
 
 type alias Physical a =
-    HasPosition (HasVelocity (HasMass a))
+    HasSize (HasPosition (HasVelocity (HasMass a)))
 
 setPosition : Vector -> HasPosition a -> HasPosition a
 setPosition pos obj =
@@ -57,6 +58,7 @@ updatePosition deltaT obj =
     in
         { obj | position = position_, angle = angle_ }
 
+
 accelerate : Vector -> HasVelocity (HasMass a) -> HasVelocity (HasMass a)
 accelerate totalForce obj =
     let
@@ -65,9 +67,11 @@ accelerate totalForce obj =
     in
         { obj | velocity = velocity_ }
 
+
 applyForce : Float -> Vector -> HasVelocity (HasMass a) -> HasVelocity (HasMass a)
 applyForce deltaT force obj =
     accelerate (Vector.scale deltaT force) obj
+
 
 accelerateAngle : Float -> HasVelocity (HasMass a) -> HasVelocity (HasMass a)
 accelerateAngle totalAngularForce obj =
@@ -76,7 +80,88 @@ accelerateAngle totalAngularForce obj =
         angularSpeed_ = obj.angularSpeed + deltaV
     in
         { obj | angularSpeed = angularSpeed_ }
-    
+
+
 applyAngularForce : Float -> Float -> HasVelocity (HasMass a) -> HasVelocity (HasMass a)
 applyAngularForce deltaT force obj =
     accelerateAngle (deltaT * force) obj
+
+
+clampPosition : HasPosition a -> HasPosition a
+clampPosition obj =
+    let
+        (x,y) = Vector.toXY obj.position
+        x_ = modFloatBy Constants.worldWidth x
+        y_ = modFloatBy Constants.worldWidth y
+        position_ = Vector.Cartesian { x = x_, y = y_ }
+    in
+        { obj | position = position_ }
+
+
+modFloatBy : Int -> Float -> Float
+modFloatBy base n =
+    if n < 0
+        then
+            modFloatBy base (n + toFloat base)
+        else
+            if n > toFloat base
+                then modFloatBy base (n - toFloat base)
+                else n
+
+
+vectorBetween : HasPosition a -> HasPosition b -> Vector
+vectorBetween obj1 obj2 =
+    Vector.subtract obj2.position obj1.position -- Should be vector from obj1 to obj2
+
+
+overlap : HasPosition (HasSize a) -> HasPosition (HasSize b) -> Maybe Vector
+overlap obj1 obj2 =
+    let
+        difference = vectorBetween obj1 obj2
+        distance = Vector.magnitude difference
+        isCollision = distance < obj1.size + obj2.size
+    in
+        if isCollision
+            then Just difference
+            else Nothing
+
+
+reflect : Vector -> HasVelocity a -> HasVelocity a
+reflect normalVec obj =
+    let
+        normal = Vector.toUnit normalVec
+        normalScaling = 2 * (Vector.dot obj.velocity normal)
+        velocity_ = 
+            Vector.subtract
+                obj.velocity
+                (Vector.scale normalScaling normal)
+    in
+        { obj | velocity = velocity_ }
+
+collide : Physical a -> Physical b -> (Physical a, Physical b)
+collide obj1 obj2 =
+    let
+        positionDiff = Vector.subtract obj1.position obj2.position
+        velocityDiff = Vector.subtract obj1.velocity obj2.velocity
+        massCoeff    = 2 / (obj1.mass + obj2.mass)
+
+        distance = Vector.magnitude positionDiff
+
+        coeff = massCoeff * (Vector.dot velocityDiff positionDiff) / distance ^ 2
+
+        v1_ =
+            Vector.subtract
+                obj1.velocity
+                (Vector.scale
+                    (coeff * obj1.mass)
+                    positionDiff)
+
+        v2_ =
+            Vector.subtract
+                obj2.velocity
+                (Vector.scale
+                    (coeff * obj2.mass)
+                    (Vector.negate positionDiff))
+    in
+        ({ obj1 | velocity = v1_ }, { obj2 | velocity = v2_ })
+    

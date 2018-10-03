@@ -15,6 +15,9 @@ worldCenter =
         , y = toFloat worldHeight / 2
         }
 
+newWorldBufferRadius : Float
+newWorldBufferRadius = 50
+
 -- kg-rad/s
 rotationalThrust : Float
 rotationalThrust = 5
@@ -37,8 +40,13 @@ backThrustVec =
 maxSpeed : Int
 maxSpeed = 200
 
+shipSize = 20
+
 minAsteroids = 1
 maxAsteroids = 5
 
 minAsteroidSize = 0.5
 maxAsteroidSize = 4
+
+minAsteroidSpeed = 5
+maxAsteroidSpeed = 20

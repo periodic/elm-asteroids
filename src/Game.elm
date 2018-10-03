@@ -67,20 +67,33 @@ turnThrusterOff : Model.Thruster -> Model.Ship -> Model.Ship
 turnThrusterOff =
     updateThruster (\_ -> False)
 
-updatePlayer : (Model.Ship -> Model.Ship) -> GameState -> GameState
-updatePlayer f state =
-    { state | player = f state.player }
-
 handleTick : Float -> GameState -> GameState
 handleTick ms state =
     let
         deltaT = ms / 1000
     in
-        state
-            |> updatePlayer (
-                Physical.updatePosition deltaT
-                    >> clampPosition
-                    >> updateShipVelocity deltaT)
+        state |> updatePlayer deltaT |> updateAsteroids deltaT |> handleCollisions
+
+updatePlayer : Float -> GameState -> GameState
+updatePlayer deltaT state =
+    let
+        player_ =
+            state.player 
+                |> Physical.updatePosition deltaT
+                |> Physical.clampPosition
+                |> updateShipVelocity deltaT
+    in
+        { state | player = player_ }
+
+updateAsteroids : Float -> GameState -> GameState
+updateAsteroids deltaT state =
+    let
+        asteroids_ =
+            List.map
+                (Physical.updatePosition deltaT >> Physical.clampPosition)
+                state.asteroids 
+    in
+        { state | asteroids = asteroids_ }
 
 updateShipVelocity : Float -> Model.Ship -> Model.Ship
 updateShipVelocity deltaT ship =
@@ -109,31 +122,34 @@ updateShipVelocity deltaT ship =
                 else 0
 
         totalAngularForce =
-            (rightForce - leftForce)
+            (leftForce - rightForce)
     in
         ship
             |> Physical.applyForce deltaT totalForce
             |> Physical.setAngularSpeed totalAngularForce
 
-
-
-modFloatBy : Int -> Float -> Float
-modFloatBy base n =
-    if n < 0
-        then
-            modFloatBy base (n + toFloat base)
-        else
-            if n > toFloat base
-                then modFloatBy base (n - toFloat base)
-                else n
-
-
-clampPosition : Model.Ship -> Model.Ship
-clampPosition ship =
+handleCollisions : Model.GameState -> Model.GameState
+handleCollisions state =
     let
-        (x,y) = Vector.toXY ship.position
-        x_ = modFloatBy Constants.worldWidth x
-        y_ = modFloatBy Constants.worldWidth y
-        position_ = Vector.Cartesian { x = x_, y = y_ }
+        (player_, asteroids_) = handleShipCollisions state.player state.asteroids
     in
-        { ship | position = position_ }
+        { state | player = player_, asteroids = asteroids_}
+    
+
+handleShipCollisions : Model.Ship -> List Model.Asteroid -> (Model.Ship, List Model.Asteroid)
+handleShipCollisions ship asteroids =
+    List.foldr handleCollisionsFold (ship, []) asteroids
+
+handleCollisionsFold : Model.Asteroid -> (Model.Ship, List Model.Asteroid) -> (Model.Ship, List Model.Asteroid)
+handleCollisionsFold asteroid (ship, asteroids) =
+    let
+        overlap = Physical.overlap asteroid ship
+    in
+        case overlap of
+            Just shipNormal ->
+                let
+                    (ship_, asteroid_) = Physical.collide ship asteroid
+                in
+                    (ship_, asteroid_ :: asteroids)
+            Nothing ->
+                (ship, asteroid :: asteroids)
