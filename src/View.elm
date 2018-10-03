@@ -47,6 +47,10 @@ viewShip { position, angle } =
         div
             [ style "font-famly" "sans-serif"
             , style "color" "black"
+            , style "width" "32px"
+            , style "height" "24px"
+            , style "background" "url('/images/ship.png') no-repeat 0 -16px"
+            , style "background-size" "192px 608px"
             , style "position" "absolute"
             , style "transform" transform
             ]
@@ -61,11 +65,15 @@ viewAsteroid { position, angle, size } =
     in
         div
             [ style "font-famly" "sans-serif"
+            , style "width" "12px"
+            , style "height" "12px"
+            , style "background" "url('/images/asteroids.png') no-repeat -16px 0"
+            , style "background-size" "76px 144px"
             , style "color" "black"
             , style "position" "absolute"
             , style "transform" <| transform
             ]
-            [ text "O" ]
+            [ text "" ]
     
 
 viewGameState : Model.GameState -> Html Messages.Msg
