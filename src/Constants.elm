@@ -10,7 +10,10 @@ worldHeight = 400
 
 worldCenter : Vector
 worldCenter =
-    Vector.Cartesian (toFloat worldWidth / 2) (toFloat worldHeight / 2)
+    Vector.Cartesian
+        { x = toFloat worldWidth / 2
+        , y = toFloat worldHeight / 2
+        }
 
 -- kg-rad/s
 rotationalThrust : Float
@@ -21,14 +24,14 @@ forwardThrust : Float
 forwardThrust = 80
 
 forwardThrustVec =
-    Vector.Polar forwardThrust 0
+    Vector.Polar { r = forwardThrust, t = 0 }
 
 -- kg-m/s^2
 backThrust : Float
 backThrust = 50
 
 backThrustVec =
-    Vector.Polar backThrust (turns 0.5)
+    Vector.Polar { r = backThrust, t = turns 0.5 }
 
 -- m/s
 maxSpeed : Int

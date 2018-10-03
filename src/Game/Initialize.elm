@@ -4,6 +4,7 @@ import Model
 import Constants
 import Game.Generators exposing (generateGame)
 import Messages exposing (Msg)
+import Vector
 import Random
 
 
@@ -13,5 +14,6 @@ init =
         cmd = Random.generate Messages.NewGame generateGame
     in
         (Nothing, cmd)
+    -- (Just { player = Model.newShip Vector.zero, asteroids = [] }, Cmd.none)
     
 

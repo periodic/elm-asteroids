@@ -17,6 +17,9 @@ update msg state =
 
         Messages.ShipCommand command ->
             updateForCommandStart command state
+        
+        _ ->
+            state
 
 
 updateForCommandStart : Model.ShipCommand -> GameState -> GameState
@@ -85,11 +88,11 @@ updateShipVelocity deltaT ship =
         forwardForce =
             if ship.thrusters.back
                 then Constants.forwardThrustVec
-                else Vector.Polar 0 0
+                else Vector.zero
         backForce =
             if ship.thrusters.forward
                 then Constants.backThrustVec
-                else Vector.Polar 0 0
+                else Vector.zero
             
         totalForce =
             Vector.add forwardForce backForce
@@ -131,6 +134,6 @@ clampPosition ship =
         (x,y) = Vector.toXY ship.position
         x_ = modFloatBy Constants.worldWidth x
         y_ = modFloatBy Constants.worldWidth y
-        position_ = Vector.Cartesian x_ y_
+        position_ = Vector.Cartesian { x = x_, y = y_ }
     in
         { ship | position = position_ }

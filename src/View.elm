@@ -21,7 +21,7 @@ translate translation =
 rotate: Vector -> String
 rotate rotation =
     let
-        (_, t) = Vector.toPolar (Vector.rotate (turns 0.25) rotation)
+        t = Vector.angle (Vector.rotate (turns 0.25) rotation)
     in
         "rotate(" ++ String.fromFloat t ++ "rad)"
 

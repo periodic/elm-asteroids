@@ -8,7 +8,7 @@ import Constants
 generateWorldVector : Generator Vector
 generateWorldVector =
     Random.map2
-        Vector.Cartesian
+        (\x y -> Vector.Cartesian { x = x, y = y })
         (Random.float 0 (toFloat Constants.worldWidth))
         (Random.float 0 (toFloat Constants.worldHeight))
 

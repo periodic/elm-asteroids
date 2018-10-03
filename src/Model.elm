@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Vector exposing (Vector)
 import Physical exposing (Physical)
+
 import Random
 
 type Thruster
@@ -33,7 +34,7 @@ type alias Ship =
 newShip : Vector -> Ship
 newShip pos =
     { position = pos
-    , velocity = Vector.origin
+    , velocity = Vector.zero
     , angle = Vector.unit 0
     , angularSpeed = 0
     , mass = 1
@@ -53,7 +54,7 @@ type alias Asteroid =
 newAsteroid : Float -> Vector -> Asteroid
 newAsteroid size pos =
     { position = pos
-    , velocity = Vector.origin
+    , velocity = Vector.zero
     , angle = Vector.unit 0
     , angularSpeed = 0
     , mass = size -- For now just make size and mass scale linearly.

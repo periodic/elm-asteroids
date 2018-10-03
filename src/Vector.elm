@@ -31,8 +31,8 @@ toXY vec =
             (x, y)
 
 
-origin : Vector
-origin =
+zero : Vector
+zero =
     Cartesian {x = 0, y = 0}
 
 
@@ -74,7 +74,7 @@ angle vec =
         Polar { t } ->
             t
         Cartesian {x, y} ->
-            toPolar (x, y)
+            toPolar (x, y) |> Tuple.second
     
 magnitude : Vector -> Float
 magnitude vec =
@@ -82,4 +82,4 @@ magnitude vec =
         Polar { r } ->
             r
         Cartesian {x, y} ->
-            toPolar (x, y)
+            toPolar (x, y) |> Tuple.first
