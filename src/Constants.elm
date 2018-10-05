@@ -18,7 +18,7 @@ worldCenter =
 newWorldBufferRadius : Float
 newWorldBufferRadius = 50 * shipMass
 
--- rad/s
+-- kg-rad/s
 rotationalSpeed : Float
 rotationalSpeed = 5
 
@@ -31,7 +31,7 @@ forwardThrustVec =
 
 -- kg-m/s^2
 backThrust : Float
-backThrust = 50
+backThrust = 50 * shipMass
 
 backThrustVec =
     Vector.Polar { r = backThrust, t = turns 0.5 }

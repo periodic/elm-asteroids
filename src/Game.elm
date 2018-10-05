@@ -114,11 +114,11 @@ updateShipVelocity deltaT ship =
         -- Rotational thrusters are impulse thrusters, so turn rotation on or off.
         rightForce = 
             if ship.thrusters.left
-                then Constants.rotationalThrust
+                then Constants.rotationalSpeed
                 else 0
         leftForce = 
             if ship.thrusters.right
-                then Constants.rotationalThrust
+                then Constants.rotationalSpeed
                 else 0
 
         totalAngularForce =
