@@ -19,9 +19,14 @@ generateWorldVector =
         (Random.float 0 (toFloat Constants.worldWidth))
         (Random.float 0 (toFloat Constants.worldHeight))
 
-generateAsteroidSize : Generator Float
+generateAsteroidSize : Generator Model.AsteroidSize
 generateAsteroidSize =
-    Random.float Constants.minAsteroidSize Constants.maxAsteroidSize
+    Random.uniform
+        Model.AsteroidSizeXSmall
+        [ Model.AsteroidSizeSmall
+        , Model.AsteroidSizeMedium
+        , Model.AsteroidSizeLarge
+        ]
 
 {- 
  - Generates the asteroid position within a given band. Does not place things

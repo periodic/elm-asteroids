@@ -22,7 +22,7 @@ type alias HasMass a =
 
 type alias HasSize a =
     { a
-    | size: Float
+    | radius: Float
     }
 
 type alias Physical a =
@@ -119,7 +119,7 @@ overlap obj1 obj2 =
     let
         difference = vectorBetween obj1 obj2
         distance = Vector.magnitude difference
-        isCollision = distance < obj1.size + obj2.size
+        isCollision = distance < obj1.radius + obj2.radius
     in
         if isCollision
             then Just difference

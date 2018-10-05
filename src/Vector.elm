@@ -4,6 +4,15 @@ type Vector
     = Polar { r: Float, t: Float }
     | Cartesian { x: Float, y: Float }
 
+-- TODO: This probably needs optimization
+modFloatBy : Float -> Float -> Float
+modFloatBy base n =
+    if (n > base)
+        then modFloatBy base (n - base)
+        else
+            if (n < 0)
+                then modFloatBy base (n + base)
+                else n
 
 dot : Vector -> Vector -> Float
 dot v1 v2 =
@@ -93,12 +102,12 @@ rotate : Float -> Vector -> Vector
 rotate deltaT vec =
     case vec of
         Polar {r, t} ->
-            Polar { r = r, t = (t + deltaT) }
+            Polar { r = r, t = modFloatBy (turns 1) (t + deltaT) }
         Cartesian {x, y} ->
             let
                 (r, t) = Basics.toPolar (x, y)
             in
-                Polar { r = r, t = (t + deltaT) }
+                Polar { r = r, t = modFloatBy (turns 1) (t + deltaT) }
 
 rotateTo : Vector -> Vector -> Vector
 rotateTo toVec vec =

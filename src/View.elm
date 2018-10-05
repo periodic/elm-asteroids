@@ -21,7 +21,7 @@ translate translation =
 rotate: Vector -> String
 rotate rotation =
     let
-        t = Vector.angle (Vector.rotate (turns 0.25) rotation)
+        t = Vector.angle rotation
     in
         "rotate(" ++ String.fromFloat t ++ "rad)"
 
@@ -41,8 +41,13 @@ mergeTransforms transforms =
 viewShip : Model.Ship -> Html Messages.Msg
 viewShip { position, angle } =
     let
-        offset = gameToSpatial position
-        transform = mergeTransforms [translate offset, rotate angle]
+        cornerOffset = Vector.Cartesian { x = Constants.shipSize, y = Constants.shipSize }
+        visualOffset =
+            Vector.subtract
+                (gameToSpatial position)
+                cornerOffset
+        visualAngle = Vector.rotate (turns 0.75) angle
+        transform = mergeTransforms [translate visualOffset, rotate visualAngle]
     in
         div
             [ style "font-famly" "sans-serif"
@@ -54,21 +59,43 @@ viewShip { position, angle } =
             , style "position" "absolute"
             , style "transform" transform
             ]
-            [ text "V" ]
+            [ text "" ]
 
+
+asteroidSizeToPixels : Model.AsteroidSize -> Int
+asteroidSizeToPixels size =
+    case size of
+        Model.AsteroidSizeXSmall -> 16
+        Model.AsteroidSizeSmall  -> 16
+        Model.AsteroidSizeMedium -> 32
+        Model.AsteroidSizeLarge  -> 48
+
+asteroidSpriteOffset : Model.AsteroidSize -> Int
+asteroidSpriteOffset size =
+    case size of
+        Model.AsteroidSizeXSmall -> 0
+        Model.AsteroidSizeSmall  -> 16
+        Model.AsteroidSizeMedium -> 32
+        Model.AsteroidSizeLarge  -> 64
 
 viewAsteroid : Model.Asteroid -> Html Messages.Msg
 viewAsteroid { position, angle, size } =
     let
-        offset = gameToSpatial position
-        transform = mergeTransforms [translate offset, rotate angle, scale size]
+        pixelSize = asteroidSizeToPixels size
+        spriteOffset = asteroidSpriteOffset size
+        halfWidth = pixelSize // 2
+        cornerOffset = Vector.Cartesian { x = (toFloat halfWidth), y = (toFloat halfWidth)}
+        offset =
+            Vector.subtract
+                (gameToSpatial position)
+                cornerOffset
+        transform = mergeTransforms [translate offset, rotate angle]
     in
         div
             [ style "font-famly" "sans-serif"
-            , style "width" "12px"
-            , style "height" "12px"
-            , style "background" "url('/images/asteroids.png') no-repeat -16px 0"
-            , style "background-size" "76px 144px"
+            , style "width" (String.fromInt pixelSize ++ "px")
+            , style "height" (String.fromInt pixelSize ++ "px")
+            , style "background" ("url('/images/asteroids.png') no-repeat -" ++ String.fromInt spriteOffset ++ "px 0")
             , style "color" "black"
             , style "position" "absolute"
             , style "transform" <| transform

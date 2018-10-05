@@ -16,15 +16,15 @@ worldCenter =
         }
 
 newWorldBufferRadius : Float
-newWorldBufferRadius = 50
+newWorldBufferRadius = 50 * shipMass
 
--- kg-rad/s
-rotationalThrust : Float
-rotationalThrust = 5
+-- rad/s
+rotationalSpeed : Float
+rotationalSpeed = 5
 
 -- kg-m/s^2
 forwardThrust : Float
-forwardThrust = 80
+forwardThrust = 80 * shipMass
 
 forwardThrustVec =
     Vector.Polar { r = forwardThrust, t = 0 }
@@ -40,13 +40,21 @@ backThrustVec =
 maxSpeed : Int
 maxSpeed = 200
 
-shipSize = 20
+shipSize = 16
+shipMass = 100
 
 minAsteroids = 1
 maxAsteroids = 5
 
 minAsteroidSize = 0.5
 maxAsteroidSize = 4
+
+asteroidSize =
+    { xsmall = 8
+    , small = 16
+    , medium = 24
+    , large = 32
+    }
 
 minAsteroidSpeed = 5
 maxAsteroidSpeed = 20
