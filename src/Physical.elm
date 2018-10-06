@@ -145,22 +145,22 @@ collide obj1 obj2 =
         velocityDiff = Vector.subtract obj1.velocity obj2.velocity
         massCoeff    = 2 / (obj1.mass + obj2.mass)
 
-        distance = Vector.magnitude positionDiff
+        speed = Vector.magnitude positionDiff
 
-        coeff = massCoeff * (Vector.dot velocityDiff positionDiff) / distance ^ 2
+        coeff = massCoeff * (Vector.dot velocityDiff positionDiff) / speed ^ 2
 
         v1_ =
             Vector.subtract
                 obj1.velocity
                 (Vector.scale
-                    (coeff * obj1.mass)
+                    (coeff * obj2.mass)
                     positionDiff)
 
         v2_ =
             Vector.subtract
                 obj2.velocity
                 (Vector.scale
-                    (coeff * obj2.mass)
+                    (coeff * obj1.mass)
                     (Vector.negate positionDiff))
     in
         ({ obj1 | velocity = v1_ }, { obj2 | velocity = v2_ })

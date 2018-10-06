@@ -43,11 +43,8 @@ maxSpeed = 200
 shipSize = 16
 shipMass = 100
 
-minAsteroids = 1
+minAsteroids = 2
 maxAsteroids = 5
-
-minAsteroidSize = 0.5
-maxAsteroidSize = 4
 
 asteroidSize =
     { xsmall = 8

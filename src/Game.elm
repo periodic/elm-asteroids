@@ -4,7 +4,7 @@ import Constants
 import Vector exposing (Vector)
 import Messages exposing (Msg)
 import Model exposing (GameState)
-import Physical
+import Physical exposing (Physical)
 import Random
 
 import Debug
@@ -77,8 +77,7 @@ handleTick ms state =
 updatePlayer : Float -> GameState -> GameState
 updatePlayer deltaT state =
     let
-        player_ =
-            state.player 
+        player_ = state.player 
                 |> Physical.updatePosition deltaT
                 |> Physical.clampPosition
                 |> updateShipVelocity deltaT
@@ -132,15 +131,16 @@ handleCollisions : Model.GameState -> Model.GameState
 handleCollisions state =
     let
         (player_, asteroids_) = handleShipCollisions state.player state.asteroids
+        asteroids__ = handleInterAsteroidCollisions asteroids_
     in
-        { state | player = player_, asteroids = asteroids_}
+        { state | player = player_, asteroids = asteroids__}
     
 
 handleShipCollisions : Model.Ship -> List Model.Asteroid -> (Model.Ship, List Model.Asteroid)
 handleShipCollisions ship asteroids =
     List.foldr handleCollisionsFold (ship, []) asteroids
 
-handleCollisionsFold : Model.Asteroid -> (Model.Ship, List Model.Asteroid) -> (Model.Ship, List Model.Asteroid)
+handleCollisionsFold : Physical a -> (Physical b, List (Physical a)) -> (Physical b, List (Physical a))
 handleCollisionsFold asteroid (ship, asteroids) =
     let
         overlap = Physical.overlap asteroid ship
@@ -148,8 +148,20 @@ handleCollisionsFold asteroid (ship, asteroids) =
         case overlap of
             Just shipNormal ->
                 let
-                    (ship_, asteroid_) = Physical.collide ship asteroid
+                    (ship_, asteroid_) =
+                        Physical.collide ship asteroid
                 in
                     (ship_, asteroid_ :: asteroids)
             Nothing ->
                 (ship, asteroid :: asteroids)
+
+handleInterAsteroidCollisions : List Model.Asteroid -> List Model.Asteroid
+handleInterAsteroidCollisions asteroids =
+    case asteroids of
+        [] ->
+            []
+        asteroid :: otherAsteroids ->
+            let
+                (asteroid_, otherAsteroids_) = List.foldr handleCollisionsFold (asteroid, []) otherAsteroids
+            in
+                asteroid_ :: handleInterAsteroidCollisions otherAsteroids_

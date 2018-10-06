@@ -44,6 +44,14 @@ keyToDirection string =
             Just Model.Forward
         "ArrowDown" ->
             Just Model.Back
+        "a" ->
+            Just Model.Left
+        "d" ->
+            Just Model.Right
+        "w" ->
+            Just Model.Forward
+        "s" ->
+            Just Model.Back
         _ ->
             Nothing
 
