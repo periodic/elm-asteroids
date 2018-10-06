@@ -73,6 +73,7 @@ generateGame =
         (\asteroids ->
             { player = Model.newShip Constants.worldCenter
             , asteroids = asteroids
+            , missiles = [ Model.newMissile Vector.zero Vector.zero Vector.zero ]
             })
         generateAsteroids
         

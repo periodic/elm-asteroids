@@ -31,7 +31,10 @@ updateForCommandStart command state =
         Model.DeactivateThruster thruster ->
             { state | player = turnThrusterOff thruster state.player }
 
-        _ ->
+        Model.FireMissile ->
+            fireMissile state
+        
+        Model.NoCommand ->
             state
 
 updateThrusters : (Model.Thrusters -> Model.Thrusters) -> Model.Ship -> Model.Ship
@@ -67,12 +70,28 @@ turnThrusterOff : Model.Thruster -> Model.Ship -> Model.Ship
 turnThrusterOff =
     updateThruster (\_ -> False)
 
+fireMissile : GameState -> GameState
+fireMissile state =
+    let
+        player = state.player
+        missileDistanceFromPlayer = player.radius + Constants.missileRadius
+        missileOffset = Vector.scale missileDistanceFromPlayer player.angle
+        missilePosition =
+            Vector.add
+                player.position
+                missileOffset
+        missile = Model.newMissile missilePosition player.velocity player.angle
+    in
+        { state | missiles = missile :: state.missiles }
+    
+
 handleTick : Float -> GameState -> GameState
 handleTick ms state =
     let
         deltaT = ms / 1000
     in
-        state |> updatePlayer deltaT |> updateAsteroids deltaT |> handleCollisions
+        state |> updatePlayer deltaT |> updateAsteroids deltaT |> updateMissiles deltaT |> handleCollisions
+
 
 updatePlayer : Float -> GameState -> GameState
 updatePlayer deltaT state =
@@ -94,6 +113,16 @@ updateAsteroids deltaT state =
     in
         { state | asteroids = asteroids_ }
 
+updateMissiles : Float -> GameState -> GameState
+updateMissiles deltaT state =
+    let
+        missiles_ =
+            List.map
+                (Physical.updatePosition deltaT >> Physical.clampPosition)
+                state.missiles 
+    in
+        { state | missiles = missiles_ }
+
 updateShipVelocity : Float -> Model.Ship -> Model.Ship
 updateShipVelocity deltaT ship =
     let
@@ -108,7 +137,7 @@ updateShipVelocity deltaT ship =
             
         totalForce =
             Vector.add forwardForce backForce
-                |> Vector.rotateTo ship.angle
+                |> Vector.rotate (Vector.angle ship.angle)
 
         -- Rotational thrusters are impulse thrusters, so turn rotation on or off.
         rightForce = 
@@ -133,7 +162,8 @@ handleCollisions state =
         (player_, asteroids_) = handleShipCollisions state.player state.asteroids
         asteroids__ = handleInterAsteroidCollisions asteroids_
     in
-        { state | player = player_, asteroids = asteroids__}
+        handleMissileCollisions
+            { state | player = player_, asteroids = asteroids__}
     
 
 handleShipCollisions : Model.Ship -> List Model.Asteroid -> (Model.Ship, List Model.Asteroid)
@@ -165,3 +195,35 @@ handleInterAsteroidCollisions asteroids =
                 (asteroid_, otherAsteroids_) = List.foldr handleCollisionsFold (asteroid, []) otherAsteroids
             in
                 asteroid_ :: handleInterAsteroidCollisions otherAsteroids_
+
+handleMissileCollisions : GameState -> GameState
+handleMissileCollisions state =
+    let
+        missiles = state.missiles
+        asteroids = state.asteroids
+    in
+        List.foldr
+            handleMissileCollisionsFold
+            { state | missiles = [] }
+            missiles
+
+handleMissileCollisionsFold : Model.Missile -> GameState -> GameState
+handleMissileCollisionsFold missile state =
+    case checkMissileCollisions missile state.asteroids of
+        Just asteroids_ ->
+            { state | asteroids = asteroids_ }
+        Nothing ->
+            { state | missiles = missile :: state.missiles }
+
+
+checkMissileCollisions : Model.Missile -> List Model.Asteroid -> Maybe (List Model.Asteroid)
+checkMissileCollisions missile asteroids =
+    case asteroids of
+        [] ->
+            Nothing
+        asteroid :: remaining ->
+            if Physical.overlaps missile asteroid
+                then
+                    Just remaining
+                else
+                    checkMissileCollisions missile remaining |> Maybe.map (\asters -> asteroid :: asters)

@@ -2,7 +2,7 @@ module Model exposing (..)
 
 import Constants
 import Vector exposing (Vector)
-import Physical exposing (Physical)
+import Physical exposing (..)
 
 import Random
 
@@ -81,7 +81,31 @@ newAsteroid size pos velocity =
         , mass = radius * radius -- For now just make size and mass scale quadratically.
         }
 
+type alias Missile =
+    HasPosition (HasVelocity (HasSize {}))
+
+newMissile : Vector -> Vector -> Vector -> Missile
+newMissile position baseVelocity direction =
+    let
+        angle =
+            Vector.toUnit direction
+        relativeVelocity =
+            Vector.scale Constants.missileSpeed angle
+        absoluteVelocity =
+            Vector.add
+                baseVelocity
+                relativeVelocity
+    in
+        { position = position
+        , angle = angle
+        , velocity = absoluteVelocity
+        , angularSpeed = 0
+        , radius = Constants.missileRadius
+        }
+    
+
 type alias GameState =
     { player: Ship
     , asteroids: List Asteroid
+    , missiles: List Missile
     }

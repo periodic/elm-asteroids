@@ -46,15 +46,15 @@ viewShip { position, angle } =
             Vector.subtract
                 (gameToSpatial position)
                 cornerOffset
-        visualAngle = Vector.rotate (turns 0.75) angle
-        transform = mergeTransforms [translate visualOffset, rotate visualAngle]
+        visualAngle = Vector.rotate (turns 0.25) angle
+        transform = mergeTransforms [translate visualOffset, rotate visualAngle, scale 2]
     in
         div
             [ style "font-famly" "sans-serif"
-            , style "color" "black"
-            , style "width" "32px"
-            , style "height" "24px"
-            , style "background" "url('/images/ship.png') no-repeat 0 -16px"
+            , style "color" "white"
+            , style "width" "16px"
+            , style "height" "20px"
+            , style "background" "url('/images/ship.png') no-repeat 0 -71px"
             , style "background-size" "192px 608px"
             , style "position" "absolute"
             , style "transform" transform
@@ -96,19 +96,51 @@ viewAsteroid { position, angle, size } =
             , style "width" (String.fromInt pixelSize ++ "px")
             , style "height" (String.fromInt pixelSize ++ "px")
             , style "background" ("url('/images/asteroids.png') no-repeat -" ++ String.fromInt spriteOffset ++ "px 0")
-            , style "color" "black"
+            , style "color" "white"
             , style "position" "absolute"
-            , style "transform" <| transform
+            , style "transform" transform
             ]
             [ text "" ]
+
+viewMissile : Model.Missile -> Html Messages.Msg
+viewMissile { position, angle } =
+    let
+        halfWidth = toFloat Constants.missileRadius
+        cornerOffset =
+            Vector.Cartesian
+                { x = halfWidth
+                , y = halfWidth
+                }
+        offset =
+            Vector.subtract
+                (gameToSpatial position)
+                cornerOffset
+        transform = mergeTransforms [translate offset, rotate angle]
+    in
+        div
+            [ style "transform" transform
+            , style "color" "white"
+            , style "position" "absolute"
+            , style "width" <| String.fromInt <| Constants.missileRadius * 2
+            , style "height" <| String.fromInt <| Constants.missileRadius * 2
+            ]
+            [ text "." ]
+    
     
 
 viewGameState : Model.GameState -> Html Messages.Msg
-viewGameState { player, asteroids } =
-    div [ style "position" "relative" ]
+viewGameState { player, asteroids, missiles } =
+    div [ style "position" "relative"
+        , style "width" (String.fromInt Constants.worldWidth ++ "px")
+        , style "height" (String.fromInt Constants.worldHeight ++ "px")
+        , style "background-color" "black"
+        , style "overflow" "hidden"
+        ]
         [ viewShip player
         , div []
             (List.map viewAsteroid asteroids)
+        , div []
+            (List.map viewMissile missiles)
         ]
 
 viewGame : Maybe Model.GameState -> Html Messages.Msg

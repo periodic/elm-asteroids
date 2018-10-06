@@ -55,3 +55,6 @@ asteroidSize =
 
 minAsteroidSpeed = 5
 maxAsteroidSpeed = 20
+
+missileRadius = 5
+missileSpeed = 50

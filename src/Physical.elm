@@ -113,6 +113,13 @@ vectorBetween : HasPosition a -> HasPosition b -> Vector
 vectorBetween obj1 obj2 =
     Vector.subtract obj2.position obj1.position -- Should be vector from obj1 to obj2
 
+overlaps : HasPosition (HasSize a) -> HasPosition (HasSize b) -> Bool
+overlaps obj1 obj2 =
+    case overlap obj1 obj2 of
+        Just _ ->
+            True
+        Nothing ->
+            False
 
 overlap : HasPosition (HasSize a) -> HasPosition (HasSize b) -> Maybe Vector
 overlap obj1 obj2 =

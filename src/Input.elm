@@ -41,24 +41,25 @@ keyToDirection string =
         "ArrowRight" ->
             Just Model.Right
         "ArrowUp" ->
-            Just Model.Forward
-        "ArrowDown" ->
             Just Model.Back
+        "ArrowDown" ->
+            Just Model.Forward
         "a" ->
             Just Model.Left
         "d" ->
             Just Model.Right
         "w" ->
-            Just Model.Forward
-        "s" ->
             Just Model.Back
+        "s" ->
+            Just Model.Forward
         _ ->
             Nothing
 
 keyToWeaponsCommand : String -> Maybe Model.ShipCommand
 keyToWeaponsCommand string =
     case string of
-        "Space" ->
+        " " ->
+            Debug.log "Firing missile" <|
             Just Model.FireMissile
         _ ->
             Nothing
