@@ -224,6 +224,56 @@ checkMissileCollisions missile asteroids =
         asteroid :: remaining ->
             if Physical.overlaps missile asteroid
                 then
-                    Just remaining
+                    Just <| splitAsteroid missile.velocity asteroid ++ remaining
                 else
                     checkMissileCollisions missile remaining |> Maybe.map (\asters -> asteroid :: asters)
+
+nextSmallerAsteroid : Model.AsteroidSize -> Maybe Model.AsteroidSize
+nextSmallerAsteroid size =
+    case size of
+        Model.AsteroidSizeXSmall ->
+            Nothing
+        Model.AsteroidSizeSmall ->
+            Just Model.AsteroidSizeXSmall
+        Model.AsteroidSizeMedium ->
+            Just Model.AsteroidSizeSmall
+        Model.AsteroidSizeLarge ->
+            Just Model.AsteroidSizeMedium
+
+splitAsteroid : Vector -> Model.Asteroid -> List Model.Asteroid
+splitAsteroid impactDirection asteroid =
+    case nextSmallerAsteroid asteroid.size of
+        Nothing ->
+            []
+        Just newSize ->
+            let
+                baseVelocity = asteroid.velocity
+                normalDirection = Vector.toUnit impactDirection
+
+                relativeVelocity =
+                    Vector.scale Constants.asteroidBreakupSpeed normalDirection
+                relativeVelocity1 =
+                    Vector.rotate (turns 0.25) relativeVelocity
+                relativeVelocity2 =
+                    Vector.rotate (turns 0.75) relativeVelocity
+
+                offset =
+                    Vector.scale (toFloat (Model.asteroidSizeToRadius asteroid.size) / 2) normalDirection
+                offset1 =
+                    Vector.rotate (turns 0.25) offset
+                offset2 =
+                    Vector.rotate (turns 0.75) offset
+                
+                position1 =
+                    Vector.add asteroid.position offset1
+                velocity1 =
+                    Vector.add asteroid.velocity relativeVelocity1
+                position2 =
+                    Vector.add asteroid.position offset2
+                velocity2 =
+                    Vector.add asteroid.velocity relativeVelocity2
+            in
+                [ Model.newAsteroid newSize position1 velocity1
+                , Model.newAsteroid newSize position2 velocity2
+                ]
+    

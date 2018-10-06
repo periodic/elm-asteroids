@@ -47,15 +47,14 @@ viewShip { position, angle } =
                 (gameToSpatial position)
                 cornerOffset
         visualAngle = Vector.rotate (turns 0.25) angle
-        transform = mergeTransforms [translate visualOffset, rotate visualAngle, scale 2]
+        transform = mergeTransforms [translate visualOffset, rotate visualAngle]
     in
         div
             [ style "font-famly" "sans-serif"
             , style "color" "white"
-            , style "width" "16px"
-            , style "height" "20px"
-            , style "background" "url('/images/ship.png') no-repeat 0 -71px"
-            , style "background-size" "192px 608px"
+            , style "width" "32px"
+            , style "height" "40px"
+            , style "background" "url('/images/ship.png') no-repeat 0 -142px"
             , style "position" "absolute"
             , style "transform" transform
             ]
