@@ -6,6 +6,7 @@ import Messages
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Constants
+import Physical
 
 gameToSpatial : Vector -> Vector
 gameToSpatial =
@@ -129,18 +130,28 @@ viewMissile { position, angle } =
 
 viewGameState : Model.GameState -> Html Messages.Msg
 viewGameState { player, asteroids, missiles } =
-    div [ style "position" "relative"
-        , style "width" (String.fromInt Constants.worldWidth ++ "px")
-        , style "height" (String.fromInt Constants.worldHeight ++ "px")
-        , style "background-color" "black"
-        , style "overflow" "hidden"
-        ]
-        [ viewShip player
-        , div []
-            (List.map viewAsteroid asteroids)
-        , div []
-            (List.map viewMissile missiles)
-        ]
+    let
+        ships =
+            duplicateIfNearEdge player
+        asteroids_ =
+            List.concatMap duplicateIfNearEdge asteroids
+        missiles_ =
+            List.concatMap duplicateIfNearEdge missiles
+    in
+        div [ style "position" "relative"
+            , style "width" (String.fromInt Constants.worldWidth ++ "px")
+            , style "height" (String.fromInt Constants.worldHeight ++ "px")
+            , style "background-color" "black"
+            , style "overflow" "hidden"
+            ]
+            [ div []
+                (List.map viewShip ships)
+            , div []
+                (List.map viewAsteroid asteroids_)
+            , div []
+                (List.map viewMissile missiles_)
+            ]
+
 
 viewGame : Maybe Model.GameState -> Html Messages.Msg
 viewGame maybeGame =
@@ -149,3 +160,38 @@ viewGame maybeGame =
             viewGameState game
         Nothing ->
             text "Loading"
+
+
+duplicateIfNearEdge : Physical.HasPosition (Physical.HasSize a) -> List (Physical.HasPosition (Physical.HasSize a))
+duplicateIfNearEdge obj =
+    [obj] ++ duplicateHoriz obj ++ duplicateVert obj
+
+
+duplicateHoriz : Physical.HasPosition (Physical.HasSize a) -> List (Physical.HasPosition (Physical.HasSize a))
+duplicateHoriz obj =
+    let
+        (x, y) = Vector.toXY obj.position
+        buffer = obj.radius * 2
+        width = toFloat Constants.worldWidth
+    in
+        if x < buffer
+            then [ {obj | position = Vector.Cartesian { x = x + width, y = y } }]
+            else
+                if x > (width - buffer)
+                then [ {obj | position = Vector.Cartesian { x = x - width, y = y } }]
+                else []
+
+
+duplicateVert : Physical.HasPosition (Physical.HasSize a) -> List (Physical.HasPosition (Physical.HasSize a))
+duplicateVert obj =
+    let
+        (x, y) = Vector.toXY obj.position
+        buffer = obj.radius * 2
+        height = toFloat Constants.worldHeight
+    in
+        if y < buffer
+            then [ {obj | position = Vector.Cartesian { x = x, y = y + height } }]
+            else
+                if y > (height - buffer)
+                then [ {obj | position = Vector.Cartesian { x = x, y = y - height } }]
+                else []
