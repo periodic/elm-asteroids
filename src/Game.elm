@@ -32,7 +32,7 @@ updateForCommandStart command state =
             { state | player = turnThrusterOff thruster state.player }
 
         Model.FireMissile ->
-            fireMissile state
+            handleFireMissile state
         
         Model.NoCommand ->
             state
@@ -70,6 +70,15 @@ turnThrusterOff : Model.Thruster -> Model.Ship -> Model.Ship
 turnThrusterOff =
     updateThruster (\_ -> False)
 
+handleFireMissile : GameState -> GameState
+handleFireMissile state =
+    let
+        player = state.player
+    in
+        if player.loadedMissiles > 0
+            then fireMissile state
+            else state
+
 fireMissile : GameState -> GameState
 fireMissile state =
     let
@@ -81,8 +90,12 @@ fireMissile state =
                 player.position
                 missileOffset
         missile = Model.newMissile missilePosition player.velocity player.angle
+        player_ =
+            { player
+            | loadedMissiles = player.loadedMissiles - 1
+            }
     in
-        { state | missiles = missile :: state.missiles }
+        { state | player = player_, missiles = missile :: state.missiles }
     
 
 handleTick : Float -> GameState -> GameState
@@ -90,7 +103,11 @@ handleTick ms state =
     let
         deltaT = ms / 1000
     in
-        state |> updatePlayer deltaT |> updateAsteroids deltaT |> updateMissiles deltaT |> handleCollisions
+        state
+            |> updatePlayer deltaT
+            |> updateAsteroids deltaT
+            |> updateMissiles deltaT
+            |> handleCollisions
 
 
 updatePlayer : Float -> GameState -> GameState
@@ -100,8 +117,26 @@ updatePlayer deltaT state =
                 |> Physical.updatePosition deltaT
                 |> Physical.clampPosition
                 |> updateShipVelocity deltaT
+                |> updateAmmo deltaT
     in
         { state | player = player_ }
+
+updateAmmo : Float -> Model.Ship -> Model.Ship
+updateAmmo deltaT ship =
+    if ship.loadedMissiles >= Constants.maximumMissiles
+        then ship
+        else
+            if ship.missileReload >= Constants.missileReloadPeriod
+                then loadMissile ship
+                else { ship | missileReload = Debug.log "Reloading..." <| ship.missileReload + deltaT }
+
+loadMissile : Model.Ship -> Model.Ship
+loadMissile ship =
+    { ship
+    | loadedMissiles = Debug.log "Loaded missile" <| ship.loadedMissiles + 1 
+    , missileReload = 0
+    }
+    
 
 updateAsteroids : Float -> GameState -> GameState
 updateAsteroids deltaT state =

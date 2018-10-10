@@ -30,6 +30,8 @@ type alias Thrusters =
 type alias Ship =
     Physical
     { thrusters: Thrusters
+    , loadedMissiles: Int
+    , missileReload: Float -- ms
     }
 
 newShip : Vector -> Ship
@@ -40,6 +42,8 @@ newShip pos =
     , angularSpeed = 0
     , mass = Constants.shipMass
     , radius = Constants.shipSize
+    , loadedMissiles = 1
+    , missileReload = 0
     , thrusters = {
         left = False,
         right = False,

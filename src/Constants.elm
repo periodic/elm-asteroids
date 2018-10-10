@@ -58,5 +58,7 @@ maxAsteroidSpeed = 20
 
 asteroidBreakupSpeed = 10
 
-missileRadius = 5
-missileSpeed = 100
+missileRadius = 5 -- ms/s
+missileSpeed = 100 -- ms/s
+missileReloadPeriod = 0.25 -- s
+maximumMissiles = 1
