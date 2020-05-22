@@ -55,7 +55,7 @@ viewShip { position, angle } =
             , style "color" "white"
             , style "width" "32px"
             , style "height" "40px"
-            , style "background" "url('/images/ship.png') no-repeat 0 -142px"
+            , style "background" "url('images/ship.png') no-repeat 0 -142px"
             , style "position" "absolute"
             , style "transform" transform
             ]
@@ -95,7 +95,7 @@ viewAsteroid { position, angle, size } =
             [ style "font-famly" "sans-serif"
             , style "width" (String.fromInt pixelSize ++ "px")
             , style "height" (String.fromInt pixelSize ++ "px")
-            , style "background" ("url('/images/asteroids.png') no-repeat -" ++ String.fromInt spriteOffset ++ "px 0")
+            , style "background" ("url('images/asteroids.png') no-repeat -" ++ String.fromInt spriteOffset ++ "px 0")
             , style "color" "white"
             , style "position" "absolute"
             , style "transform" transform
